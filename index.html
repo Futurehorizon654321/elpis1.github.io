@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #ffd3b6;
+            margin: 0;
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+            position: relative;
+        }
+        .card-container {
+            perspective: 1000px;
+            width: 300px;
+            height: 400px;
+        }
+        .card {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 1s;
+        }
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+        .front, .back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .front {
+            background-color: #ffeab6;
+            color: #474744;
+            padding: 10px;
+        }
+        .back {
+            background-image: url("card.jpg");
+            background-size: cover;
+            background-position: center;
+            transform: rotateY(180deg);
+        }
+        .message {
+            opacity: 0;
+            animation: fadeIn 3s forwards;
+            text-align: center;
+        }
+        .cake-image {
+            max-width: 300px;
+            margin-top: 20px;
+            opacity: 0;
+            animation: fadeIn 3s forwards;
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        .firework {
+            position: absolute;
+            pointer-events: none;
+            will-change: transform;
+        }
+         
+    </style>
+</head>
+<body>
+    <audio src="goodlife.mp3" loop="loop" controls="controls" autoplay="autoplay"></audio>
+    <div class="card-container">
+        <div class="card" id="birthdayCard">
+            <div class="front">
+                <div class="message" id="greeting"></div>
+                <div class="message" id="wish"></div>
+                <img src="cake.png" alt="Birthday Cake" class="cake-image">
+            </div>
+            <div class="back"></div>
+        </div>
+    </div>
+
+    <script>
+        const messages = ['Happy birthday', 'May your life be filled with joy forever'];
+        let messageIndex = 0;
+
+        function typeWriter(elementId, message) {
+            let i = 0;
+            const element = document.getElementById(elementId);
+            const speed = 100;
+            function writeNextChar() {
+                if (i < message.length) {
+                    element.innerHTML += message.charAt(i);
+                    i++;
+                    setTimeout(writeNextChar, speed);
+                } else {
+                    messageIndex++;
+                    if (messageIndex < messages.length) {
+                        setTimeout(() => typeWriter(`message${messageIndex}`, messages[messageIndex]), 500);
+                    }
+                }
+            }
+            writeNextChar();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            typeWriter('greeting', messages[0]);
+            typeWriter('wish', messages[1]);
+
+            document.getElementById('birthdayCard').addEventListener('click', () => {
+                document.getElementById('birthdayCard').classList.toggle('flipped');
+            });
+
+            // Fireworks effect
+            function createFirework(x, y) {
+                const firework = document.createElement('div');
+                firework.classList.add('firework');
+                firework.style.left = `${x}px`;
+                firework.style.top = `${y}px`;
+                firework.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                firework.style.width = '8px';
+                firework.style.height = '8px';
+                firework.style.borderRadius = '50%';
+                document.body.appendChild(firework);
+
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 5 + 3;
+                const gravity = 0.09;
+                let vy = -speed;
+                let vx = Math.cos(angle) * speed;
+                let opacity = 1;
+
+                function animate() {
+                    x += vx;
+                    y += vy;
+                    vy += gravity;
+                    opacity -= 0.01;
+
+                    firework.style.transform = `translate(${x}px, ${y}px) scale(${opacity})`;
+
+                    if (opacity <= 0) {
+                        firework.remove();
+                    } else {
+                        requestAnimationFrame(animate);
+                    }
+                }
+
+                animate();
+            }
+
+            setInterval(() => {
+                const x = Math.random() * window.innerWidth;
+                const y = Math.random() * window.innerHeight;
+                createFirework(x, y);
+            }, 10);
+        });
+    </script>
+</body>
+</html>
